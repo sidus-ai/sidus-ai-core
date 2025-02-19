@@ -1,0 +1,13 @@
+[project]
+name = "sidusia"
+version = "0.0.1.alpha"
+# ...
+dependencies = [
+    "networkx==3.4.2",
+]
+
+[tool.setuptools]
+packages = [
+    "sidusai", "sidusai.config", "sidusai.core", "sidusai.logger",
+    "sidusai.plugins"
+]
