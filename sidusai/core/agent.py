@@ -1,5 +1,6 @@
-import asyncio
 import inspect
+import threading as th
+import time
 
 import sidusai.core.context as context
 import sidusai.core.execute as ex
@@ -184,11 +185,12 @@ class Agent:
 
     def task_execute(self, task: types.AgentTask):
         """
-        Completing a task by using active skills
+        Performing a task using active skills in a separate thread
         :param task:
         :return:
         """
-        context.task_execute(task, self.ctx)
+        _thread = th.Thread(target=context.task_execute, args=(task, self.ctx,))
+        _thread.start()
 
     def application_build(self):
         if self.is_builded:
@@ -214,23 +216,30 @@ class Agent:
         self.is_builded = True
 
     def application_run(self, interval: int = 1):
+        """
+        Implementation of the main loop of the application. As long as the active flag is set,
+        the application is executed, launching the corresponding annotated methods as needed at
+        a given interval in separate threads
+        :param interval: wait between iterations
+        :return:
+        """
         if not self.is_builded:
             self.application_build()
-
-        asyncio.run(self._loop(interval))
-
-    async def _loop(self, interval):
         while self.is_enabled:
-
             cur_ms = utils.current_sec()
-
             for loop in self.ctx.loops:
-                # TODO: Add async to loop executable
-                if loop.fixed_interval_sec is not None and cur_ms - loop.last_loop_at > loop.fixed_interval_sec:
-                    ex.execute_executable(loop.executable, self.ctx.components)
-                    loop.last_loop_at = cur_ms
+                if loop.fixed_interval_sec is not None and cur_ms - loop.last_loop_at > loop.fixed_interval_sec and not loop.is_executing:
+                    loop.is_executing = True
+                    thread_name = f'thread_{loop.executable.default_name}'
+                    # TODO: Create a queue pool to limit the number of tasks running in parallel
+                    _thread = th.Thread(target=self._execute_loop, name=thread_name, args=(loop,))
+                    _thread.start()
+            time.sleep(interval)
 
-            await asyncio.sleep(interval)
+    def _execute_loop(self, loop):
+        ex.execute_executable(loop.executable, self.ctx.components)
+        loop.is_executing = False
+        loop.last_loop_at = utils.current_sec()
 
     def halt(self):
         self.is_enabled = False

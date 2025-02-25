@@ -68,6 +68,7 @@ class LoopContainer:
         self.executable = executable
 
         self.last_loop_at = utils.current_sec()
+        self.is_executing = False
 
 
 class NamedTypedContainer:
