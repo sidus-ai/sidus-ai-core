@@ -15,5 +15,6 @@ from sidusai.core.types import (
     AgentValue, AgentTask
 )
 
+import sidusai.config as config
 import sidusai.core.utils as utils
 import sidusai.logger as logger

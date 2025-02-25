@@ -8,6 +8,11 @@ dependencies = [
 
 [tool.setuptools]
 packages = [
+    # Core framework
     "sidusai", "sidusai.config", "sidusai.core", "sidusai.logger",
-    "sidusai.plugins"
+    # Default plugins
+    "sidusai.plugins.deepseek", "sidusai.plugins.openai", "sidusai.plugins.transformer",
+    "sidusai.plugins.ethereum", "sidusai.plugins.solana",
+    "sidusai.plugins.telegram", "sidusai.plugins.twitter",
+    "sidusai.plugins.web"
 ]
