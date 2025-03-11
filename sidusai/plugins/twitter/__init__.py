@@ -1,109 +1,58 @@
-import sidusai
+import sidusai as sai
 
 __required_modules__ = ['tweepy']
-sidusai.utils.validate_modules(__required_modules__)
+sai.utils.validate_modules(__required_modules__)
 
-import tweepy
+import sidusai.core.plugin as _cp
+import sidusai.plugins.twitter.components as components
+import sidusai.plugins.deepseek as _ds
+
+__default_agent_name__ = 'x_ai_agent_name'
 
 
-class TwitterConnectionProperty:
-    """
-    Object wrapper for the Twitter agent extension configuration
-    """
+class TwitterPrepareTweetTask(sai.CompletedAgentTask):
+    pass
 
-    def __init__(self, bearer_token, api_key, api_secret, access_token, access_token_secret):
+
+class TwitterAget(sai.Agent):
+    def __init__(self, system_prompt: str,
+                 bearer_token: str, api_key: str, api_secret: str, access_token: str, access_token_secret: str,
+                 plugins: [sai.AgentPlugin], prepare_task_skills: [] = None):
+        super().__init__(__default_agent_name__)
+
         self.bearer_token = bearer_token
         self.api_key = api_key
         self.api_secret = api_secret
         self.access_token = access_token
         self.access_token_secret = access_token_secret
 
+        for plugin in plugins:
+            plugin.apply_plugin(self)
 
-class TwitterConnection:
-    """
-    The object of the formed connection to the Twitter API
-    """
+        self.add_component_builder(self._build_twitter_client)
+        task_skills = prepare_task_skills if prepare_task_skills is not None else []
+        task_skills.append(_ds.skills.ds_chat_transform_skill)
 
-    def __init__(self):
-        self.client = None
-        self.api = None
+        skill_names = _cp.build_and_register_task_skill_names(task_skills, self)
+        self.task_registration(TwitterPrepareTweetTask, skill_names=skill_names)
 
+        self.chat = sai.ChatAgentValue([])
+        if system_prompt is not None:
+            self.chat.append_system(system_prompt)
 
-class TwitterExtensionPlugin(sidusai.AgentExtension):
-    """
-    Agent extensions with connection to Twitter API.
-    Extends the context by adding connection components
-    """
+    def prepare_tweet(self, message: str, handler):
+        if message is None:
+            raise ValueError('Message can not be None')
+        self.chat.append_user(message)
 
-    def __init__(self,
-                 agent: sidusai.Agent,
-                 bearer_token=None,
-                 api_key=None,
-                 api_secret=None,
-                 access_token=None,
-                 access_token_secret=None
-                 ):
-        super().__init__(agent)
+        task = TwitterPrepareTweetTask(self).data(self.chat).then(handler)
+        self.task_execute(task)
 
-        # Connection properties
-        self.connection_property = TwitterConnectionProperty(
-            bearer_token, api_key, api_secret, access_token, access_token_secret
+    def _build_twitter_client(self) -> components.TwitterClient:
+        return components.TwitterClient(
+            bearer_token=self.bearer_token,
+            api_key=self.api_key,
+            api_secret=self.api_secret,
+            access_token=self.access_token,
+            access_token_secret=self.access_token_secret,
         )
-        self.connection = TwitterConnection()
-
-        # Agent environment
-        self.agent.add_component_builder(self.twitter_connection_property_component)
-        self.agent.add_component_builder(self.twitter_connection_component)
-        self.agent.add_post_processor(twitter_connection_post_processor)
-
-    def twitter_connection_property_component(self) -> TwitterConnectionProperty:
-        return self.connection_property
-
-    def twitter_connection_component(self) -> TwitterConnection:
-        return self.connection
-
-
-def twitter_connection_post_processor(props: TwitterConnectionProperty, conn: TwitterConnection):
-    _validate_configuration_connection(props)
-
-    conn.client = tweepy.Client(
-        bearer_token=props.bearer_token,
-        consumer_key=props.api_key,
-        consumer_secret=props.api_secret,
-        access_token=props.access_token,
-        access_token_secret=props.access_token_secret
-    )
-
-    auth = tweepy.OAuthHandler(
-        consumer_key=props.api_key,
-        consumer_secret=props.api_secret,
-        access_token=props.access_token,
-        access_token_secret=props.access_token_secret
-    )
-
-    conn.api = tweepy.API(auth)
-    _validate_connection(conn)
-
-
-def _validate_connection(conn: TwitterConnection):
-    try:
-        conn.api.verify_credentials()
-    except Exception as e:
-        raise ConnectionRefusedError(e)
-
-
-def _validate_configuration_connection(props: TwitterConnectionProperty):
-    if props.bearer_token is None:
-        raise ValueError('Twitter Bearer key is not found. Please configuration plugin')
-
-    if props.api_key is None:
-        raise ValueError('Twitter Consumer API Key is not found. Please configuration plugin')
-
-    if props.api_secret is None:
-        raise ValueError('Twitter Consumer API Secret is not found. Please configuration plugin')
-
-    if props.access_token is None:
-        raise ValueError('Twitter Access token is not found. Please configuration plugin')
-
-    if props.access_token_secret is None:
-        raise ValueError('Twitter Access token secret is not found. Please configuration plugin')

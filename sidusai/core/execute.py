@@ -2,7 +2,6 @@ import inspect
 from typing import Hashable
 
 from sidusai.core.types import NamedTypedContainer
-
 from sidusai.core.utils import camel_to_snake
 
 __return__ = 'return'
@@ -32,7 +31,7 @@ class Executable(Hashable):
     Class-wrapper for wrap executable methods
     """
 
-    def __init__(self, handler, order: int = 0):
+    def __init__(self, handler, order: int = 0, name: str = None):
         if not callable(handler):
             raise SyntaxError(f'Handler {handler} in Executable must be callable')
 
@@ -55,6 +54,7 @@ class Executable(Hashable):
         self.parameters = {k: v for k, v in _params.items() if k != __return__}
         self.default_name = build_handler_name(handler)
         self.order = order
+        self.name = name if name is not None else self.default_name
 
     def __hash__(self):
         return hash(self)

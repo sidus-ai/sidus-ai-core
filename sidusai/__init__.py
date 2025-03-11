@@ -1,10 +1,13 @@
 """
 SiduSAI Framework
-
 """
 
+#################################################################
+# Core Framework
+#################################################################
+
 from sidusai.core.agent import (
-    Agent, AgentExtension
+    Agent
 )
 
 from sidusai.core.context import (
@@ -13,6 +16,14 @@ from sidusai.core.context import (
 
 from sidusai.core.types import (
     AgentValue, AgentTask
+)
+
+from sidusai.core.plugin import (
+    ChatAgentValue, CompletedAgentTask
+)
+
+from sidusai.core.plugin import (
+    AgentPlugin
 )
 
 import sidusai.config as config

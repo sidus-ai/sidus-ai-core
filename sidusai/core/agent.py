@@ -243,13 +243,3 @@ class Agent:
 
     def halt(self):
         self.is_enabled = False
-
-
-class AgentExtension:
-    """
-    Agent extension class.
-    Used to implement user and system extensions.
-    """
-
-    def __init__(self, agent: Agent):
-        self.agent = agent

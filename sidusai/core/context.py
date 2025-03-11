@@ -54,6 +54,12 @@ class AgentContext:
         # allowing events to be generated within the context.
         self.loops = []
 
+    def get_skill_by_handler(self, handler) -> ex.Executable | None:
+        for name, skill in self.skills.items():
+            if skill.handler == handler:
+                return skill
+        return None
+
     #############################################################
     # Configuration context
     #############################################################
@@ -75,7 +81,7 @@ class AgentContext:
 
         self.components_builders.put(executable, key=_name)
 
-    def add_agent_skill(self, skill, skill_name: str = None):
+    def add_agent_skill(self, skill, skill_name: str = None) -> ex.Executable:
         """
         Method for adding a skill to the agent context.
         All agent skills will be initialized after the components are initialized.
@@ -84,16 +90,16 @@ class AgentContext:
         :param skill_name: User's skill name
         :return:
         """
-        executable = ex.Executable(skill)
-        name = skill_name if skill_name is not None else executable.default_name
+        executable = ex.Executable(skill, name=skill_name)
 
-        if name in self.skills.keys():
+        if executable.name in self.skills.keys():
             raise ValueError(
-                f'Skill {name} already exist. '
+                f'Skill {executable.name} already exist. '
                 f'Avoid duplication in agent skill names. Duplication in names will lead to unpredictable collisions'
             )
 
-        self.skills[name] = executable
+        self.skills[executable.name] = executable
+        return executable
 
     def add_task_class(self, handler, task_name: str, available_skills_names: [str]):
         """
@@ -315,6 +321,8 @@ def make_task(task, context: AgentContext):
 def task_execute(task: types.AgentTask, context: AgentContext):
     """
     We perform the task of enumerating active skills registered for the task
+
+    TODO: Move to executable module
     :param task:
     :param context:
     :return:
