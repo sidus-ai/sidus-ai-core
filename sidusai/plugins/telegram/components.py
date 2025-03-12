@@ -43,7 +43,16 @@ class TelegramChatInMemoryCache:
 
         messages.append(message)
         if self.message_store_limit is not None and 0 < self.message_store_limit < len(messages):
-            messages = messages[-self.message_store_limit:]
+            # Saving system or first only messages at the beginning of the context
+            s_index = 0
+            for index, msg in enumerate(messages):
+                if 'role' in msg and msg['role'] == 'system':
+                    s_index = index
+                    continue
+                break
+            if s_index + 1 >= self.message_store_limit:
+                s_index = self.message_store_limit - 2
+            messages = messages[:s_index + 1] + messages[(-self.message_store_limit + s_index + 1):]
 
         self.cache[user_id] = messages
 
