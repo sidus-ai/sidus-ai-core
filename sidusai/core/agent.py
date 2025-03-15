@@ -1,5 +1,4 @@
 import inspect
-import threading as th
 import time
 
 import sidusai.core.context as context
@@ -20,6 +19,8 @@ class Agent:
         self.ctx = context.AgentContext(self.agent_name)
         self.is_builded = False
         self.is_enabled = True
+
+        self._thread_pool = ex.ThreadPool()
 
     #################################################################
     # Core decorators
@@ -181,7 +182,7 @@ class Agent:
         :param task: str or type
         :return:
         """
-        return context.make_task(task, self.ctx)
+        return self.ctx.build_task(task)
 
     def task_execute(self, task: types.AgentTask):
         """
@@ -189,8 +190,10 @@ class Agent:
         :param task:
         :return:
         """
-        _thread = th.Thread(target=context.task_execute, args=(task, self.ctx,))
-        _thread.start()
+        self._thread_pool.execute(
+            target=self._execute_task,
+            args=(task,)
+        )
 
     def application_build(self):
         if self.is_builded:
@@ -203,8 +206,13 @@ class Agent:
         # Component configuration
         context.sort_executables_by_order(self.ctx.configurations)
         context.sort_executables_by_order(self.ctx.post_processors)
-        context.executable_list(self.ctx.configurations, self.ctx)
-        context.executable_list(self.ctx.post_processors, self.ctx)
+
+        # Apply configuration
+        for executable in self.ctx.configurations:
+            ex.execute_executable(executable, self.ctx.components)
+
+        for executable in self.ctx.post_processors:
+            ex.execute_executable(executable, self.ctx.components)
 
         # Build and storage all skills
         context.build_skills(self.ctx)
@@ -230,16 +238,30 @@ class Agent:
             for loop in self.ctx.loops:
                 if loop.fixed_interval_sec is not None and cur_ms - loop.last_loop_at > loop.fixed_interval_sec and not loop.is_executing:
                     loop.is_executing = True
-                    thread_name = f'thread_{loop.executable.default_name}'
-                    # TODO: Create a queue pool to limit the number of tasks running in parallel
-                    _thread = th.Thread(target=self._execute_loop, name=thread_name, args=(loop,))
-                    _thread.start()
+                    self._thread_pool.execute(
+                        target=self._execute_loop,
+                        args=(loop,)
+                    )
             time.sleep(interval)
 
     def _execute_loop(self, loop):
         ex.execute_executable(loop.executable, self.ctx.components)
         loop.is_executing = False
         loop.last_loop_at = utils.current_sec()
+
+    def _execute_task(self, task: types.AgentTask):
+        task_type = type(task)
+        task_container = self.ctx.get_task_container(task_type)
+        skill_names = task_container.skill_graph.get_active_nodes()
+        skills = self.ctx.find_executable_skills(skill_names)
+
+        forward_executable = ex.Executable(task.forward)
+        on_complete_executable = ex.Executable(task.on_complete)
+        value: types.AgentValue = ex.execute_executable(forward_executable, self.ctx.components)
+        for skill in skills:
+            value = ex.execute_executable(skill, self.ctx.components, {'value': value})
+
+        ex.execute_executable(on_complete_executable, self.ctx.components, {'value': value})
 
     def halt(self):
         self.is_enabled = False

@@ -60,6 +60,24 @@ class AgentContext:
                 return skill
         return None
 
+    def get_task_container(self, task_type: str | type) -> types.TaskContainer:
+        _task = None
+        for _name, _container in self.tasks.items():
+            if _name == task_type or _container.task_type == task_type:
+                _task = _container
+                break
+        return _task
+
+    def build_task(self, task_type: str | type):
+        _task = self.get_task_container(task_type)
+        if _task is None:
+            raise ValueError(f'Task {task_type} is not found')
+
+        return ex.execute_executable(_task.executable_init, self.components)
+
+    def find_executable_skills(self, skill_names: list) -> list:
+        return [self.skills[s] for s in skill_names]
+
     #############################################################
     # Configuration context
     #############################################################
@@ -287,74 +305,3 @@ def sort_executables_by_order(executables: list):
     :return:
     """
     executables.sort(key=lambda executable: executable.order)
-
-
-def executable_list(executables: list, context: AgentContext):
-    """
-    We execute the list of methods to be executed
-    :param executables:
-    :param context:
-    :return:
-    """
-    for executable in executables:
-        ex.execute_executable(executable, context.components)
-
-
-#############################################################
-# Helper methods for interacting with context
-#############################################################
-
-def make_task(task, context: AgentContext):
-    """
-    Create task from context
-    :param task: Task name or type
-    :param context: application context
-    :return: task instance
-    """
-    _task = get_task_container(task, context)
-    if _task is None:
-        raise ValueError(f'Task {task} is not found')
-
-    return ex.execute_executable(_task.executable_init, context.components)
-
-
-def task_execute(task: types.AgentTask, context: AgentContext):
-    """
-    We perform the task of enumerating active skills registered for the task
-
-    TODO: Move to executable module
-    :param task:
-    :param context:
-    :return:
-    """
-    task_type = type(task)
-    task_container = get_task_container(task_type, context)
-    skill_names = task_container.skill_graph.get_active_nodes()
-    skills = find_executable_skills(skill_names, context)
-
-    forward_executable = ex.Executable(task.forward)
-    on_complete_executable = ex.Executable(task.on_complete)
-    value: types.AgentValue = ex.execute_executable(forward_executable, context.components)
-    for skill in skills:
-        value = ex.execute_executable(skill, context.components, {'value': value})
-
-    ex.execute_executable(on_complete_executable, context.components, {'value': value})
-
-
-def get_task_container(task, context: AgentContext) -> types.TaskContainer:
-    """
-    Get task by name or type
-    :param task:  Task name or type
-    :param context:
-    :return:
-    """
-    _task = None
-    for _name, _container in context.tasks.items():
-        if _name == task or _container.task_type == task:
-            _task = _container
-            break
-    return _task
-
-
-def find_executable_skills(skill_names: list, context: AgentContext) -> list:
-    return [context.skills[s] for s in skill_names]

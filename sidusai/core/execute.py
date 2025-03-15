@@ -1,4 +1,6 @@
 import inspect
+import threading as th
+
 from typing import Hashable
 
 from sidusai.core.types import NamedTypedContainer
@@ -70,6 +72,21 @@ class ExecutableContainer(NamedTypedContainer):
             return obj.return_param
 
         raise TypeError('This container must be contains only Executable objects')
+
+
+class ThreadPool:
+    """
+    An auxiliary wrapper used to manage threads in an application.
+
+    todo: Add batches and locks
+    """
+
+    def __init__(self, pool_max_size: int = 16):
+        self._pool_max_size = pool_max_size
+
+    def execute(self, target=None, args=()):
+        thread = th.Thread(target=target, args=args)
+        thread.start()
 
 
 def build_parameters(executable: Executable, container: NamedTypedContainer):
