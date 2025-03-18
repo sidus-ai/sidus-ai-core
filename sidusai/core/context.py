@@ -54,6 +54,8 @@ class AgentContext:
         # allowing events to be generated within the context.
         self.loops = []
 
+        self.exception_handlers = []
+
     def get_skill_by_handler(self, handler) -> ex.Executable | None:
         for name, skill in self.skills.items():
             if skill.handler == handler:
@@ -67,6 +69,18 @@ class AgentContext:
                 _task = _container
                 break
         return _task
+
+    def get_exception_handlers(self, error_type: type) -> list:
+        res = []
+        for err in self.exception_handlers:
+            if len(err.error_types) == 0 or error_type in err.error_types:
+                res.append(err.executable)
+                continue
+
+            for _err_type in err.error_types:
+                if issubclass(error_type, _err_type):
+                    res.append(err.executable)
+        return res
 
     def build_task(self, task_type: str | type):
         _task = self.get_task_container(task_type)
@@ -182,6 +196,14 @@ class AgentContext:
         executable = ex.Executable(handler, order)
         container = types.LoopContainer(executable, fixed_interval_sec)
         self.loops.append(container)
+
+    def add_exception_handler(self, handler, error_types: list = None, order: int = 0):
+        if not callable(handler):
+            raise ValueError(f'Exception handler {handler} mast be callable')
+
+        executable = ex.Executable(handler, order)
+        container = types.ExceptionHandlerContainer(executable, error_types)
+        self.exception_handlers.append(container)
 
 
 #############################################################

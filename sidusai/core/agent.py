@@ -109,6 +109,14 @@ class Agent:
 
         return decorator
 
+    def exception_handler(self, error_types: list = None, order: int = 0):
+
+        def decorator(handler):
+            self.add_exception_handler_method(handler, error_types, order)
+            return handler
+
+        return decorator
+
     #################################################################
     # Configuration context method
     #################################################################
@@ -170,6 +178,9 @@ class Agent:
         :return:
         """
         self.ctx.add_loop_method(handler, fixed_interval_sec, order)
+
+    def add_exception_handler_method(self, handler, error_types: list = None, order: int = 0):
+        self.ctx.add_exception_handler(handler, error_types, order)
 
     #################################################################
     # Application
@@ -255,13 +266,19 @@ class Agent:
         skill_names = task_container.skill_graph.get_active_nodes()
         skills = self.ctx.find_executable_skills(skill_names)
 
-        forward_executable = ex.Executable(task.forward)
-        on_complete_executable = ex.Executable(task.on_complete)
-        value: types.AgentValue = ex.execute_executable(forward_executable, self.ctx.components)
-        for skill in skills:
-            value = ex.execute_executable(skill, self.ctx.components, {'value': value})
+        try:
+            forward_executable = ex.Executable(task.forward)
+            on_complete_executable = ex.Executable(task.on_complete)
+            value: types.AgentValue = ex.execute_executable(forward_executable, self.ctx.components)
+            for skill in skills:
+                value = ex.execute_executable(skill, self.ctx.components, {'value': value})
 
-        ex.execute_executable(on_complete_executable, self.ctx.components, {'value': value})
+            ex.execute_executable(on_complete_executable, self.ctx.components, {'value': value})
+        except BaseException as e:
+            error_type = type(e)
+            handlers = self.ctx.get_exception_handlers(error_type)
+            for handler in handlers:
+                ex.execute_executable(handler, self.ctx.components, {'exception': e})
 
     def halt(self):
         self.is_enabled = False

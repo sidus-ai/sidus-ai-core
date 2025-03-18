@@ -71,6 +71,16 @@ class LoopContainer:
         self.is_executing = False
 
 
+class ExceptionHandlerContainer:
+
+    def __init__(self, executable, error_types: list = None):
+        if error_types is None:
+            error_types = []
+        self.order = executable.order
+        self.error_types = error_types
+        self.executable = executable
+
+
 class NamedTypedContainer:
     """
     A container that provides access to content by name or by object type.
