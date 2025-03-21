@@ -36,8 +36,11 @@ class AgentSkillGraph:
         _path = list(nx.dijkstra_path(self.graph, __in__, __out__))
         return [v.split(__separator__)[0] if __separator__ in v else v for v in _path if v not in [__in__, __out__]]
 
-    # TODO: Add correct weight
-    #   use self.graph[from][to]['weight'] += N
+    def get_skill_weight(self, from_skill_name: str, to_skill_name: str):
+        return self.graph[from_skill_name][to_skill_name]['weight']
+
+    def set_skill_weight(self, from_skill_name: str, to_skill_name: str, weight):
+        self.graph[from_skill_name][to_skill_name]['weight'] = weight
 
 
 def max_skill_contains(skills: list) -> int:
