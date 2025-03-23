@@ -279,6 +279,9 @@ class Agent:
             handlers = self.ctx.get_exception_handlers(error_type)
             for handler in handlers:
                 ex.execute_executable(handler, self.ctx.components, {'exception': e})
+        finally:
+            # TODO: Is it necessary to process the completion separately?
+            pass
 
     def halt(self):
         self.is_enabled = False
