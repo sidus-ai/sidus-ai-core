@@ -22,6 +22,34 @@ class AgentPlugin:
         pass
 
 
+class SampleConnectionPlugin(AgentPlugin):
+    """
+    The basic  plugin wrapper used for to connect to external data sources or provider services.
+    """
+
+    def __init__(self):
+        super().__init__()
+
+
+class SampleAiPlugin(AgentPlugin):
+    """
+    The basic  plugin wrapper used for to connect to external AI services with api or use local models
+    (customs too).
+    """
+
+    def __init__(self):
+        super().__init__()
+
+
+class SampleBootPlugin(AgentPlugin):
+    """
+    The basic infrastructure plugin used for the configuration of the end application
+    """
+
+    def __init__(self):
+        super().__init__()
+
+
 class StringAgentValue(AgentValue):
     """
     The base agent data type is a data wrapper for a string value that is used to
