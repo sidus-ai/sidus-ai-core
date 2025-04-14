@@ -1,4 +1,4 @@
-# SiduSAI Framework
+# SidusAI Framework
 <sup>version 0.0.1 alpha</sup>
 
 Imagine a tool that not only shoulders your daily burden but also unlocks horizons of infinite possibilities!
