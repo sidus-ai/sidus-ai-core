@@ -10,12 +10,13 @@ class AgentSkillGraph:
     Skill graph formation container
     """
 
-    def __init__(self,
-                 full_skill_names: [str],
-                 available_skill_names: [str] = None,
-                 weight_for_not_use_nodes: int = 100,
-                 weight_for_used_nodes: int = 1
-                 ):
+    def __init__(
+        self,
+        full_skill_names: list,
+        available_skill_names: list = None,
+        weight_for_not_use_nodes: int = 100,
+        weight_for_used_nodes: int = 1
+    ):
         self.depth = max_skill_contains(available_skill_names)
 
         nodes = build_repeatable_nodes_names(full_skill_names, self.depth)
@@ -34,7 +35,11 @@ class AgentSkillGraph:
         :return: Get a list of available skills from the graph
         """
         _path = list(nx.dijkstra_path(self.graph, __in__, __out__))
-        return [v.split(__separator__)[0] if __separator__ in v else v for v in _path if v not in [__in__, __out__]]
+        return [
+            v.split(
+                __separator__
+            )[0] if __separator__ in v else v for v in _path if v not in [__in__, __out__]
+        ]
 
     def get_skill_weight(self, from_skill_name: str, to_skill_name: str):
         return self.graph[from_skill_name][to_skill_name]['weight']
@@ -45,7 +50,8 @@ class AgentSkillGraph:
 
 def max_skill_contains(skills: list) -> int:
     """
-    Gets the maximum number of skill inclusions. Used to include repetitions in the list of available skills.
+    Gets the maximum number of skill inclusions.
+    Used to include repetitions in the list of available skills.
     :param skills:
     :return:
     """
@@ -62,7 +68,7 @@ def build_edges(nodes: list, weight: int = 100):
     return edges
 
 
-def build_repeatable_nodes_names(nodes: [str], depth: int):
+def build_repeatable_nodes_names(nodes: list, depth: int):
     """
     We set the number of vertices, taking into account the repetition of the use of skills
     :param nodes:

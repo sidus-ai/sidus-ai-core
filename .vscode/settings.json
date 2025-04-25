@@ -1,0 +1,6 @@
+{
+    "flake8.args": [
+        "--max-line-length=100",
+        // "--ignore=E225",
+    ]
+}

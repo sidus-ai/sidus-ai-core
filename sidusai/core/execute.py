@@ -125,7 +125,11 @@ def update_parameters_from_dict(args: dict, executable: Executable, container: d
                 args[k] = typed_container[v]
 
 
-def execute_executable(executable: Executable, container: NamedTypedContainer, additional_container: dict = None):
+def execute_executable(
+    executable: Executable,
+    container: NamedTypedContainer,
+    additional_container: dict = None
+):
     """
     Execute an executable object by generating method arguments from the container
     :param additional_container:

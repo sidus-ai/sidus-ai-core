@@ -21,7 +21,8 @@ class AgentContext:
         # Builders for singletons
         self.components_builders = ex.ExecutableContainer()
 
-        # Post processors use in build method for configured components after start application configuration
+        # Post processors use in build method for configured components
+        # after start application configuration
         self.post_processors = []
 
         # Methods (callable classes) use for configuration application and create new components
@@ -105,7 +106,9 @@ class AgentContext:
         """
         executable = ex.Executable(handler=builder)
         if executable.return_param is None:
-            raise ValueError(f'The factory method of the service must explicitly specify the returned class type.')
+            raise ValueError(
+                'The factory method of the service must explicitly specify the returned class type.'
+            )
         _name = name if name is not None else executable.default_name
 
         if executable in self.components_builders or _name in self.components_builders:
@@ -127,13 +130,14 @@ class AgentContext:
         if executable.name in self.skills.keys():
             raise ValueError(
                 f'Skill {executable.name} already exist. '
-                f'Avoid duplication in agent skill names. Duplication in names will lead to unpredictable collisions'
+                'Avoid duplication in agent skill names. '
+                'Duplication in names will lead to unpredictable collisions'
             )
 
         self.skills[executable.name] = executable
         return executable
 
-    def add_task_class(self, handler, task_name: str, available_skills_names: [str]):
+    def add_task_class(self, handler, task_name: str, available_skills_names: list):
         """
         Register a task by configuring the task solution graph
         :param available_skills_names:
@@ -191,7 +195,7 @@ class AgentContext:
             raise ValueError(f'Loop method must be callable. {handler} is not a callable.')
 
         if fixed_interval_sec is None:
-            raise SyntaxError(f'Please use cron OR fixed interval')
+            raise SyntaxError('Please use cron OR fixed interval')
 
         executable = ex.Executable(handler, order)
         container = types.LoopContainer(executable, fixed_interval_sec)
@@ -263,8 +267,9 @@ def build_skills(context: AgentContext):
 
         if not callable(handler):
             raise ValueError(
-                f'Skill {skill_name} must be callable class. Please implement the __call()__ method.'
-                f'Specify in it additional arguments that should be injected from the context'
+                f'Skill {skill_name} must be callable class. '
+                'Please implement the __call()__ method.'
+                'Specify in it additional arguments that should be injected from the context'
             )
 
         context.skills[skill_name] = ex.Executable(handler)
@@ -281,16 +286,16 @@ def validate_skills(context: AgentContext):
         if skill.return_param is None:
             raise SyntaxError(
                 f'Skill {skill_name} must have return value. '
-                f'The return data type must be explicitly specified. '
-                f'The data type must be inherited from the base data class sai.AgentValue'
+                'The return data type must be explicitly specified. '
+                'The data type must be inherited from the base data class sai.AgentValue'
             )
 
         parameters = [k for k, v in skill.parameters.items() if issubclass(v, types.AgentValue)]
         if len(parameters) != 1:
             raise SyntaxError(
-                f'The agent\'s skill works on the principle of transforming objects. '
-                f'For the skills to work correctly, it is necessary that the skills explicitly '
-                f'accept the object inherited from sai.AgentValue in a single copy.'
+                'The agent\'s skill works on the principle of transforming objects. '
+                'For the skills to work correctly, it is necessary that the skills explicitly '
+                'accept the object inherited from sai.AgentValue in a single copy.'
             )
 
     # skill is correct and can be use
@@ -309,7 +314,10 @@ def build_tasks(context: AgentContext):
         task_container.skill_graph = build_skill_graph(task_container, context)
 
 
-def build_skill_graph(task_container: types.TaskContainer, context: AgentContext) -> graph.AgentSkillGraph:
+def build_skill_graph(
+    task_container: types.TaskContainer,
+    context: AgentContext
+) -> graph.AgentSkillGraph:
     """
     Factory method for create graph
     :param task_container:

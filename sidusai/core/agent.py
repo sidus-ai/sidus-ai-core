@@ -54,10 +54,11 @@ class Agent:
 
         return decorator
 
-    def task(self, task_name: str, skill_names: [str] = None):
+    def task(self, task_name: str, skill_names: list = None):
         """
         Decorator for create user's task
-        This is a special class for forming and describing the logic of the task being solved by the agent.
+        This is a special class for forming and describing
+        the logic of the task being solved by the agent.
         :return:
         """
 
@@ -85,7 +86,8 @@ class Agent:
     def post_processor(self, order: int = 0):
         """
         Decorator for create user's post-processors methods
-        The post processor is used to assemble components after they have been fine-tuned into a configuration.
+        The post processor is used to assemble components
+        after they have been fine-tuned into a configuration.
         :return:
         """
 
@@ -128,7 +130,11 @@ class Agent:
         :param name:
         :return:
         """
-        if not inspect.isfunction(builder) and not inspect.isclass(builder) and not inspect.ismethod(builder):
+        if (
+            not inspect.isfunction(builder) and
+            not inspect.isclass(builder) and
+            not inspect.ismethod(builder)
+        ):
             raise ValueError(f'Invalid service. Service \'{builder}\' must be class or function')
         self.ctx.add_component_builder(builder, name=name)
 
@@ -141,7 +147,7 @@ class Agent:
         """
         self.ctx.add_agent_skill(skill=handler, skill_name=name)
 
-    def task_registration(self, handler, name: str = None, skill_names: [str] = None):
+    def task_registration(self, handler, name: str = None, skill_names: list = None):
         """
         Registration task type to context.
         :param skill_names:
@@ -247,7 +253,11 @@ class Agent:
         while self.is_enabled:
             cur_ms = utils.current_sec()
             for loop in self.ctx.loops:
-                if loop.fixed_interval_sec is not None and cur_ms - loop.last_loop_at > loop.fixed_interval_sec and not loop.is_executing:
+                if (
+                    loop.fixed_interval_sec is not None and
+                    cur_ms - loop.last_loop_at > loop.fixed_interval_sec and
+                    not loop.is_executing
+                ):
                     loop.is_executing = True
                     self._thread_pool.execute(
                         target=self._execute_loop,

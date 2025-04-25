@@ -1,10 +1,15 @@
 import logging
 from logging.handlers import RotatingFileHandler
+from pathlib import Path
 
-import sidusai
 
-
-def build_logging(name: str, filename: str = None, max_bytes: int = 1048576, backup_count: int = 1, level=logging.INFO):
+def build_logging(
+    name: str,
+    filename: str | Path = None,
+    max_bytes: int = 1048576,
+    backup_count: int = 1,
+    level=logging.INFO
+):
     """
     Build logging object by params
     :param level: Logging level
@@ -19,7 +24,12 @@ def build_logging(name: str, filename: str = None, max_bytes: int = 1048576, bac
 
     handlers = [logging.StreamHandler()]
     if filename is not None:
-        sidusai.utils.make_dir_if_not_exist(filename)
+        if filename is str:
+            filename = Path(filename)
+        filename.parent.mkdir(
+            parents=True,
+            exist_ok=True
+        )
 
         _log_file_handler = RotatingFileHandler(
             filename=filename,

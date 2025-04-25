@@ -48,7 +48,7 @@ class TaskContainer:
     Graph caching configuration for a registered task
     """
 
-    def __init__(self, task_type: type, task_name: str, available_skill_name: [str]):
+    def __init__(self, task_type: type, task_name: str, available_skill_name: list):
         self.task_type = task_type
         self.task_name = task_name
         self.available_skill_names = available_skill_name
@@ -157,7 +157,8 @@ class NamedTypedContainer:
         _index = self._get_index(_type)
         _names = [k for k, v in self.names.items() if v == _index]
         if len(_names) != 1:
-            raise ValueError('A collision occurred. The object has multiple names or the name was not found.')
+            raise ValueError(
+                'A collision occurred. The object has multiple names or the name was not found.')
         return _names[0]
 
     def _get_index(self, key):

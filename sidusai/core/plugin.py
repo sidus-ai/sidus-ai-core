@@ -33,8 +33,8 @@ class SampleConnectionPlugin(AgentPlugin):
 
 class SampleAiPlugin(AgentPlugin):
     """
-    The basic  plugin wrapper used for to connect to external AI services with api or use local models
-    (customs too).
+    The basic  plugin wrapper used for to connect to
+    external AI services with api or use local models (customs too).
     """
 
     def __init__(self):
@@ -99,7 +99,8 @@ class ChatAgentValue(AgentValue):
 class CompletedAgentTask(AgentTask):
     """
     This is auxiliary class-extension for creating general-purpose tasks
-    An object constructor that generates data transformation tasks and passes call completion to a higher level.
+    An object constructor that generates data transformation tasks and
+    passes call completion to a higher level.
     """
 
     def __init__(self, agent: Agent, value: AgentValue | None = None, handler=None):
@@ -137,12 +138,13 @@ class CompletedAgentTask(AgentTask):
 # Utility methods
 #################################################################
 
-def build_and_register_task_skill_names(task_skills: [], agent: Agent):
+def build_and_register_task_skill_names(task_skills: list, agent: Agent):
     """
-    An additional method used in the plugins that allows you to apply a skill group to the agent context
-    and get a list of registered skill names. For registered skills, its current name will be obtained.
-    The resulting list can contain both the methods themselves, then they will be registered as skills,
-    as well as the names of already registered skills.
+    An additional method used in the plugins that allows you to apply a skill group
+    to the agent context and get a list of registered skill names. For registered skills,
+    its current name will be obtained.
+    The resulting list can contain both the methods themselves,
+    then they will be registered as skills, as well as the names of already registered skills.
 
     :param task_skills: A list of skills. Names or objects of functions
     :param agent: The current agent's object
@@ -151,7 +153,7 @@ def build_and_register_task_skill_names(task_skills: [], agent: Agent):
     skill_names = []
     for task_skill in task_skills:
         # If it is name of skill
-        if type(task_skill) == str:
+        if type(task_skill) is str:
             skill_names.append(task_skill)
             continue
 
