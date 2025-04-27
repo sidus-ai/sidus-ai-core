@@ -101,7 +101,19 @@ class DeepSeekClientComponent:
             "top_logprobs": None
         }
 
-        return {key: self.params[key] if key in self.params else default_payload[key] for key in default_payload}
+        return_payload = dict()
+
+        for key in default_payload:
+            if key in self.params:
+                return_payload.update({
+                    key: self.params[key]
+                })
+            else:
+                return_payload.update({
+                    key: default_payload[key]
+                })
+
+        return return_payload
 
     def _build_headers(self):
         return {

@@ -3,7 +3,14 @@ import tweepy
 
 class TwitterClient:
 
-    def __init__(self, bearer_token: str, api_key: str, api_secret: str, access_token: str, access_token_secret: str):
+    def __init__(
+        self,
+        bearer_token: str,
+        api_key: str,
+        api_secret: str,
+        access_token: str,
+        access_token_secret: str
+    ):
         self.bearer_token = bearer_token
         self.api_key = api_key
         self.api_secret = api_secret
@@ -59,5 +66,6 @@ class TwitterClient:
 
         if len(unset_parameters) > 0:
             raise ValueError(
-                f'Invalid Twitter connection configuration. {' '.join(unset_parameters)} parameters are not set'
+                'Invalid Twitter connection configuration. '
+                f'{' '.join(unset_parameters)} parameters are not set'
             )

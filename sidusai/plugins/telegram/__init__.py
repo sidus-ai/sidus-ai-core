@@ -1,13 +1,12 @@
 import sidusai as sai
-
-__required_modules__ = ['telebot']
-sai.utils.validate_modules(__required_modules__)
-
 import telebot as tg
 import sidusai.core.plugin as _cp
 
 import sidusai.plugins.telegram.components as components
 import sidusai.plugins.deepseek as _ds
+
+__required_modules__ = ['telebot']
+sai.utils.validate_modules(__required_modules__)
 
 __default_tg_agent_name__ = 'tg_ai_agent_name'
 __default_parse_mode__ = 'Markdown'
@@ -52,7 +51,8 @@ class TelegramRequest:
 
 class TelegramAiAgent(sai.Agent):
     """
-    The basic agent of the Telegram bot, which implements the logic of task formation based on the specified skills.
+    The basic agent of the Telegram bot,
+    which implements the logic of task formation based on the specified skills.
     Telegram event interceptors are implemented in user code.
 
     The agent also stores the history of user chats (implemented in RAM),
@@ -61,8 +61,14 @@ class TelegramAiAgent(sai.Agent):
     TODO: Extract client connection
     """
 
-    def __init__(self, bot_api_key: str, system_prompt: str, plugins: [sai.AgentPlugin],
-                 prepare_task_skills: [] = None):
+    def __init__(
+        self,
+        bot_api_key: str,
+        system_prompt: str,
+        # [sai.AgentPlugin]
+        plugins: list,
+        prepare_task_skills: list = None
+    ):
         super().__init__(__default_tg_agent_name__)
 
         self.api_key = bot_api_key

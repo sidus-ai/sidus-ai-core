@@ -1,11 +1,10 @@
 import sidusai as sai
+# import sidusai.core.plugin as _cp
+# import sidusai.plugins.openai.skills as skills
+# import sidusai.plugins.openai.components as components
 
 __required_modules__ = ['openai']
 sai.utils.validate_modules(__required_modules__)
-
-import sidusai.core.plugin as _cp
-import sidusai.plugins.openai.skills as skills
-import sidusai.plugins.openai.components as components
 
 
 class OpenAiPlugin(sai.AgentPlugin):

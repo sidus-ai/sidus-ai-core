@@ -62,7 +62,7 @@ class TelegramChatInMemoryCache:
         return None
 
     def __setitem__(self, key, value):
-        if type(value) != list:
+        if type(value) is list:
             raise ValueError('Invalid cached value')
 
         self.cache[key] = value

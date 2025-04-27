@@ -1,11 +1,10 @@
 import sidusai as sai
-
-__required_modules__ = ['requests']
-sai.utils.validate_modules(__required_modules__)
-
 import sidusai.core.plugin as _cp
 import sidusai.plugins.deepseek.skills as skills
 import sidusai.plugins.deepseek.components as components
+
+__required_modules__ = ['requests']
+sai.utils.validate_modules(__required_modules__)
 
 __deepseek_agent_name__ = 'ds_ai_agent_name'
 
@@ -43,9 +42,16 @@ class DeepSeekChatTask(sai.CompletedAgentTask):
 
 class DeepSeekSingleChatAgent(sai.Agent):
 
-    def __init__(self, api_key, system_prompt: str = None, prepare_task_skills: [] = None,
-                 temperature: float = None, top_p: float = None,
-                 max_tokens: float = None, model_name: str = None):
+    def __init__(
+        self,
+        api_key,
+        system_prompt: str = None,
+        prepare_task_skills: list = None,
+        temperature: float = None,
+        top_p: float = None,
+        max_tokens: float = None,
+        model_name: str = None
+    ):
         super().__init__(__deepseek_agent_name__)
 
         self.system_prompt = system_prompt
